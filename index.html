@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <title>Synchronizing State in a Multi-Device World</title>
+
+  <meta name="description"
+        content="Today we find ourselves in a world where we no longer interact with one computer at time, but instead with many devices at the same time. As users, we expect all of our data to be available and up to date on every device. As developers we know this means we have to brave the complexity of synchronization and concurrency.">
+  <meta name="author" content="Jenny Tong">
+
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="css/reveal.min.css">
+  <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+  <!-- For syntax highlighting -->
+  <link rel="stylesheet" href="lib/css/zenburn.css">
+
+  <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+  <script>
+    if (window.location.search.match(/print-pdf/gi)) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = 'css/print/pdf.css';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+  </script>
+
+  <script src="https://cdn.firebase.com/libs/geofire/3.0.2/geofire.min.js"></script>
+  <script src="https://cdn.firebase.com/js/client/1.0.21/firebase.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+  <!--[if lt IE 9]>
+  <script src="lib/js/html5shiv.js"></script>
+  <![endif]-->
+
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.min.js"></script>
+
+  <style>
+    .slides section img {
+      background: none;
+      box-shadow: none;
+      border: none;
+    }
+
+    ul.multicol {
+      width: 1300px;
+    }
+
+    ul.multicol li {
+      display: inline-block;
+      width: 400px;
+      height: 400px;
+    }
+
+    ul.multicol li li {
+      display: block;
+      width: auto;
+      height: auto;
+    }
+
+    .reveal section img {
+      max-height: 65%;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="reveal">
+
+  <!-- Any section element inside of this container is displayed as a slide -->
+  <div class="slides">
+    <section>
+      <h1>Synchronizing State</h1>
+
+      <h3>in a Multi-Device World</h3>
+
+      <p>
+        <small>Created by <a href="https://mimming.com">Jenny Tong</a> / <a href="https://mimming.com">mimming.com</a></small>
+      </p>
+    </section>
+
+    <section>
+      <h2>Hi! I'm Jenny.</h2>
+
+      <p>I'm a Developer Advocate at &nbsp;<img style="margin-bottom: -0.2em; height: 1.2em;" src="img/firebase-logo.png"></p>
+      <br/>
+
+      <p>I like to help people cause trouble with code.</p>
+    </section>
+
+    <section data-markdown>
+      <script type="text/template">
+        ## Agenda
+
+        - Introducing ACME
+        - The problem: Much data. So devices.
+        - Many possible solutions
+        - Example: Internet connected multimeter
+      </script>
+    </section>
+
+    <section data-markdown>
+      <script type="text/template">
+        ## Awesome Company Much Entertainment
+
+        A tiny independent app company that specalizes in solving important problems across many platforms.
+      </script>
+    </section>
+
+    <section>
+      <h2>Many devices</h2>
+      <br/><br/>
+      <a href="https://www.flickr.com/photos/jimmypons/8372997038"><img src="img/many-devices-transparent-simple.png"></a>
+    </section>
+
+    <section>
+      <h2>Great Apps</h2>
+
+      <h3>Code and data</h3>
+      <br>
+      <img src="img/icon-code.png">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <img class="fragment" src="img/icon-data.png">
+    </section>
+
+    <section data-transition="fade">
+      <h2>Great Apps</h2>
+
+      <h3>Much data</h3>
+      <br>
+      <img src="img/icon-data.png">
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <span>
+        <ul style="vertical-align: top; margin-top: 100px;">
+          <li>Preferences and settings</li>
+          <li>User created media</li>
+          <li>Recorded sensor data</li>
+          <li>Real time state</li>
+        </ul>
+      </span>
+    </section>
+
+    <section>
+      <h2>Many possible solutions</h2>
+      <br>
+      <ul>
+        <li class="fragment">Point to point</li>
+        <li class="fragment">Roll your own backend</li>
+        <li class="fragment">Android Backup Service</li>
+        <li class="fragment">Cloud API</li>
+      </ul>
+    </section>
+
+    <section data-markdown>
+      <script type="text/template">
+        ## ACME's Needs
+
+        - Focus on writing their apps
+        - Support for Glass, Android, iOS and Web
+        - Some way on to the Internet of Things bandwagon
+      </script>
+    </section>
+
+    <section>
+        <h2>Point to point</h2>
+      <ul>
+        <li>Super fast</li>
+        <li>No Internet dependency</li>
+        <li>Support matrix from sad land</li>
+      </ul>
+      <img class="fragment" style="height: 15%; width: 15%;" src="img/red-sad.png">
+    </section>
+
+    <section>
+        <h2>Roll your own backend</h2>
+      <ul>
+        <li>Great if you already have it</li>
+        <li>As configurable as the code you write</li>
+        <li>You're going to be writing a lot of code</li>
+      </ul>
+      <img class="fragment" style="height: 15%; width: 15%;" src="img/red-sad.png">
+    </section>
+
+    <section>
+        <h2>Android Backup Service</h2>
+      <ul>
+        <li>Built in to Android</li>
+        <li>Easy to set up and use</li>
+        <li>Only designed for rare restores</li>
+        <li>1MB recommended limit</li>
+        <li>Not gonna work on iOS or web</li>
+      </ul>
+
+      <img class="fragment" style="height: 15%; width: 15%;" src="img/red-sad.png">
+
+    </section>
+
+    <section >
+        <h2>Cloud APIs</h2>
+        <h4>like Firebase</h4>
+      <ul>
+        <li>Platform agnostic</li>
+        <li>Easy to set up and use</li>
+        <li>Handles lots of data</li>
+        <li>Realtime updates everywhere</li>
+      </ul>
+      <img class="fragment" style="height: 15%; width: 15%;" src="img/green-happy.png">
+
+    </section>
+
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h4>Demo</h4>
+      <br>
+      <script>
+        var fruitRef = new Firebase("https://test-firebase-please-ignore.firebaseio.com/fruitdetector");
+        fruitRef.on("value", function(snapshot) {
+          var fruitType = snapshot.val();
+          $("#fruit-type").text(fruitType.type);
+          switch (fruitType.type) {
+            case "orange":
+              $("#fruit-type").removeClass("apple");
+              $("#fruit-type").addClass("orange");
+              $("#fruit-type").removeClass("strawberry");
+
+              break;
+            case "apple":
+              $("#fruit-type").removeClass("orange");
+              $("#fruit-type").addClass("apple");
+              $("#fruit-type").removeClass("strawberry");
+
+              break;
+            case "strawberry":
+              $("#fruit-type").addClass("strawberry");
+              $("#fruit-type").removeClass("apple");
+              $("#fruit-type").removeClass("orange");
+
+            default:
+              $("#fruit-type").removeClass("apple");
+              $("#fruit-type").removeClass("orange");
+              $("#fruit-type").removeClass("strawberry");
+          }
+        });
+      </script>
+      <style>
+        #fruit-type {
+          height: 300px;
+          width: 100%;
+          background:none no-repeat left;
+        }
+        #fruit-type.apple {
+          background: url(img/apple.png) no-repeat left;
+          background-size: contain;
+        }
+        #fruit-type.orange {
+          background: url(img/orange.png) no-repeat left;
+          background-size: contain;
+        }
+        #fruit-type.strawberry {
+         background: url(img/strawberry.png) no-repeat left;
+         background-size: contain;
+       }
+
+      </style>
+      <h2>Your fruit is an</h2>
+      <h1 id="fruit-type">None</h1>
+    </section>
+
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h4>How it works</h4>
+      <img src="img/fruit-detector.png">
+    </section>
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h4>Device Code</h4>
+      <br>
+      <pre><code data-trim class="javascript" style="font-size: 22px;">
+//JavaScript
+
+var five = require("johnny-five");
+var Firebase = require("firebase");
+
+var board = new five.Board();
+// Connect to Firebase
+var myFirebaseRef =
+    new Firebase("https://fruit.firebaseio.com/fruitdetector");
+
+board.on("ready", function() {
+
+  // Set up the Adruino
+  var fruit = new five.Sensor({
+    pin: "A2",
+    freq: 250
+  });
+  board.repl.inject({ sensor: fruit });
+  ...
+      </code></pre>
+
+
+    </section>
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h4>Device Code</h4>
+      <br>
+      <pre><code data-trim class="javascript" style="font-size: 22px;">
+        //JavaScript
+  ...
+  // When the voltage changes, do math
+  fruit.scale([0, 1024]).on("data", function() {
+    var voltage = this.raw / 1024 * 5;
+    var fruitType = "unknown";
+    if(this.raw < 20) {
+      fruitType = "none";
+    } else if(this.raw >= 20 && this.raw < 92) {
+      fruitType = "orange";
+    } else if(this.raw >= 92 ) {
+      fruitType = "apple";
+    }
+
+    // Save to to Firebase and alert all listeners
+    myFirebaseRef.set({"type":fruitType, "voltage":voltage});
+  });
+});
+      </code></pre>
+
+    </section>
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h4>Web Code</h4>
+      <br>
+      <pre><code data-trim class="javascript" style="font-size: 22px;">
+// Connect to Firebase
+var fruitRef =
+    new Firebase("https://fruit.firebaseio.com/fruitdetector");
+
+// Listen for fruit changes
+fruitRef.on("value", function(snapshot) {
+  var fruitType = snapshot.val();
+  $("#fruit-type").html(fruitType.type);
+});
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h3>Google Glass Code</h3>
+      <br>
+      <p>Add the Gradle dependency to `build.gradle`</p>
+      <pre><code data-trim class="javascript" style="font-size: 22px;">
+...
+dependencies {
+  compile 'com.firebase:firebase-client:1.0.18+'
+}
+      </code></pre>
+      <p>Add a permission to the manifest</p>
+      <pre><code data-trim class="xml" style="font-size: 22px;">
+&lt;manifest package=&quot;com.firebase.sample.fruitdetector&quot; &gt;
+
+  &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
+  ...
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h3>Google Glass Code</h3>
+      <br>
+      <p>Listen for changes</p>
+      <pre><code data-trim class="java" style="font-size: 22px;">
+protected void onResume() {
+    super.onResume();
+    // Connect to Firebase
+    Firebase ref =
+new Firebase("https://fruit.firebaseio.com/fruitdetector/type");
+
+    // Listen for changes to the fruit type
+    ref.addValueEventListener(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot snapshot) {
+
+            // Get the fruit name
+            String fruitName = snapshot.getValue(String.class);
+
+            // Update the interface
+            mView = buildView();
+            setContentView(mView);
+        }
+        ...
+    });
+}
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h3>Google Glass Code</h3>
+      <br>
+      <p>Update the interface</p>
+      <pre><code data-trim class="java" style="font-size: 22px;">
+private View buildView(String fruitType) {
+    Card card = new Card(this);
+
+    card.setText(fruitType);
+    if (fruitType.equals("orange")) {
+        card.addImage(R.drawable.orange);
+    } else if (fruitType.equals("apple")) {
+        card.addImage(R.drawable.apple);
+    } else {
+        card.addImage(R.drawable.ic_stop);
+    }
+    return card.getView();
+}
+      </code></pre>
+    </section>
+
+
+    <section>
+      <h2>Realtime Fruit Detector</h2>
+      <h3>Android Code</h3>
+      <br>
+      <pre><code data-trim class="java" style="font-size: 22px;">
+protected void onResume() {
+    ...
+    // Connect to Firebase
+    Firebase myFirebaseRef =
+  new Firebase("https://fruit.firebaseio.com/fruitdetector/type");
+
+    // Find the ImageView
+    final ImageView fruitImageView =
+            (ImageView)findViewById(R.id.fruit_image);
+
+    // Listen for changes
+    myFirebaseRef.addValueEventListener(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot snapshot) {
+            String fruitType = snapshot.getValue(String.class);
+            if(fruitType.equals("orange")) {
+              fruitImageView.setImageResource(R.drawable.orange);
+            } else ...
+        }
+    });
+}
+
+
+      </code></pre>
+    </section>
+
+
+    <section>
+      <h1>THE END</h1>
+      <br/>
+
+      <h3>Questions?</h3>
+      <br/><br/>
+      <h4>Slides</h4>
+      <p><a href="https://mimming.com/presos/synchronizing-state">https://mimming.com/presos/synchronizing-state</a></p>
+      <br/>
+      <h4>Code</h4>
+      <p>These slides: <a href="https://github.com/mimming/synchronizing-state">https://github.com/mimming/synchronizing-state/</a></p>
+      <p>Fruit detector: <a href="https://github.com/mimming/firebase-fruit-detector/">https://github.com/mimming/firebase-fruit-detector/</a></p>
+      <br/>
+      <p>
+        <small>Created by <a href="https://mimming.com">Jenny Tong</a> / <a href="https://mimming.com">mimming.com</a></small>
+      </p>
+
+    </section>
+
+  </div>
+
+</div>
+
+
+<script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+    // Bounds for smallest/largest possible scale to apply to content
+    minScale: 0.2,
+    maxScale: 4.0,
+
+    theme: "night", // available themes are in /css/theme
+    transition: Reveal.getQueryHash().transition || 'concave', // default/cube/page/concave/zoom/linear/fade/none
+
+    // Parallax scrolling
+    // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+    // parallaxBackgroundSize: '2100px 900px',
+
+    // Optional libraries used to extend on reveal.js
+    dependencies: [
+      { src: 'lib/js/classList.js', condition: function () {
+        return !document.body.classList;
+      } },
+      { src: 'plugin/markdown/marked.js', condition: function () {
+        return !!document.querySelector('[data-markdown]');
+      } },
+      { src: 'plugin/markdown/markdown.js', condition: function () {
+        return !!document.querySelector('[data-markdown]');
+      } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function () {
+        hljs.initHighlightingOnLoad();
+      } },
+      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function () {
+        return !!document.body.classList;
+      } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function () {
+        return !!document.body.classList;
+      } }
+    ]
+  });
+
+  Reveal.addEventListener('slidechanged', function (event) {
+    if (event.indexh === 3 && event.indexv === 1) {
+      transitmapstart()
+    }
+  });
+
+</script>
+
+</body>
+</html>
