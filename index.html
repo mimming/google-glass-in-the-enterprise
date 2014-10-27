@@ -100,8 +100,9 @@
       <script type="text/template">
         ## Agenda
 
-        - Where Glass fits at work
+        - Where Glass fits
         - Tips and Tricks
+        - Hacks
       </script>
     </section>
 
@@ -112,7 +113,6 @@
 
         It depends...
 
-
         - Users
         - Administration
         - Problem scope
@@ -121,17 +121,17 @@
 
     <section data-markdown>
       <script type="text/template">
-        ## Users
+        ## Who is using it
 
         - Customer
         - Employee
-        - Operator
+        - Machine operator
       </script>
     </section>
 
     <section data-markdown>
       <script type="text/template">
-        ## Administration
+        ## Who is the admin
 
         - Internal IT
         - Service vendor
@@ -141,7 +141,7 @@
 
     <section data-markdown>
       <script type="text/template">
-        ## Problem Scope
+        ## Use cases
 
         - Checklist
         - Remote expert
@@ -172,10 +172,19 @@
         ## Tips and tricks
 
         - Power
+        - Poking around; getting root
+        - Bypass built in stuff
         - Device management
         - App distribution
-        - Alternative interfaces
+        - Extending the hardware
       </script>
+    </section>
+
+    <section>
+      <h2>Warning</h2>
+      <p>Hacking ahead. Thar be dragons</p>
+      <img src="img/trogdor.png">
+      <small>photo credit brownpau on flickr</small>
     </section>
 
     <section>
@@ -196,38 +205,112 @@
       </script>
     </section>
 
-    <section data-markdown>
-      <script type="text/template">
-        ## Device Management
+    <section>
+      <h2>Poking around</h2>
 
-        - This part is hard.
-        - Glass is intended for consumers
-      </script>
+      <pre><code data-trim class="bash" style="font-size: 22px;">
+# list of built in and custom *.apk’s
+$ adb shell ls /system/priv-app
+
+# list of running framework services
+$ adb shell dumpsys -l
+
+# list of packages native libraries
+$ adb shell ls /system/lib
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Unlocking Glass</h2>
+
+      <p>This disables your warranty</p>
+      <pre><code data-trim class="bash" style="font-size: 22px;">
+$ adb reboot bootloader
+$ fastboot oem unlock
+$ fastboot flash boot boot.img       # Rooted boot image
+$ fastboot flash system system.img   # Your custom system image
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Bypass built in stuff</h2>
+      <ul>
+        <li>You don't need root</li>
+        <li>Overriding the launcher intent</li>
+        <li>Don't delete <code>GlassHome.apk</code></li>
+        <li>A good place to start is the AOSP launcher</li>
+      </ul>
+
+      <pre><code data-trim class="bash" style="font-size: 22px;">
+# Remove this property inside AndroidManifest.xml
+# &lt;manifest android.sharedUserId=”android.uid.system”&gt;
+
+# Install it
+$ adb install Launcher2.apk
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Disable updates</h2>
+      <ul>
+        <li>This is probably a bad idea. It disables security updates.</li>
+        <li>You need root</li>
+      </ul>
+
+      <pre><code data-trim class="bash" style="font-size: 22px;">
+$ adb shell rm system/priv-app/GlassUpdate.apk
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Prevent Timeline Sync</h2>
+      <p>Requires <code>WRITE_SYNC_SETTINGS</code> permission</p>
+
+      <pre><code data-trim class="java" style="font-size: 22px;">
+// Disable all sync adapters
+ContentResolver.setMasterSyncAutomatically(false);
+
+// Cancel any running sync
+ContentResolver.cancelSync(null, null);
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Run Glass without a user</h2>
+
+      <p>Strange things might happen (e.g. it breaks the camera button)</p>
+
+      <pre><code data-trim class="bash" style="font-size: 22px;">
+# on a fresh Glass
+$ adb shell rm system/priv-app/GlassSetup.apk
+
+# after logging a user in
+adb shell rm data/system/users/0/accounts.db
+      </code></pre>
     </section>
 
     <section data-markdown>
       <script type="text/template">
-        ## Removing built in functionality
+        ## Device management
 
-        - Take over the launcher intent, add a boot service
-        - Root the device and remove GlassHome
+        - Glass is young
+        - It's primarily intended for consumers
+        - More enterprise stuff is coming
+        - For now, hacks
       </script>
     </section>
-    <!-- TODO: add a slide with code since this will be slow to demo -->
+
+    <section>
+      <h2>Skip the tutorial</h2>
+
+      <p>Tap with 2 fingers, 7 times</p>
+
+      <img style="display: inline; width: 40%;" src="img/tutorial.png"> <img class="fragment" style="display: inline; width: 40%;"  src="img/tutorial-skip.png">
+    </section>
 
     <section data-markdown>
       <script type="text/template">
-        ## Preventing Updates
-
-        - Root your device
-        - Delete the update APK
-      </script>
-    </section>
-    <!-- TODO: add a slide with code since this will be slow to demo -->
-
-    <section data-markdown>
-      <script type="text/template">
-        ## Device Management - Users
+        ## Managing users
 
         - Do your own auth with a QR code
         - MyGlass has an auth API too, but it requires you to be in MyGlass
@@ -239,58 +322,21 @@
         ## App distribution
 
         - Express courier
-        - MyGlass whitelisting
-           - Google Group
-           - Google Apps organization
+        - Private entry on Glass Marketplace
+
+        <img class="fragment" style="display: inline; width: 40%;" src="img/glassware-marketplace-private.png">
       </script>
     </section>
 
     <section data-markdown>
       <script type="text/template">
-        ## Alternative Interfaces
+        ## Extending the hardware
 
         - USB OTG
         - Bluetooth
         - IoT
       </script>
     </section>
-
-    <section data-markdown>
-      <script type="text/template">
-        # Demo
-
-        - Distinguish some fruit with the Internet of Things
-      </script>
-    </section>
-
-    <section data-markdown>
-      <script type="text/template">
-        # Demo
-
-        - Remove built in functionality
-        - Disable OTA
-      </script>
-    </section>
-
-
-    <!--<section>-->
-      <!--<h2>Realtime Fruit Detector</h2>-->
-      <!--<h4>Web Code</h4>-->
-      <!--<br>-->
-      <!--<pre><code data-trim class="javascript" style="font-size: 22px;">-->
-<!--// Connect to Firebase-->
-<!--var fruitRef =-->
-    <!--new Firebase("https://fruit.firebaseio.com/fruitdetector");-->
-
-<!--// Listen for fruit changes-->
-<!--fruitRef.on("value", function(snapshot) {-->
-  <!--var fruitType = snapshot.val();-->
-  <!--$("#fruit-type").html(fruitType.type);-->
-<!--});-->
-      <!--</code></pre>-->
-    <!--</section>-->
-
-
 
     <section>
       <h1>THE END</h1>
