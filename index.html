@@ -94,6 +94,7 @@
       <br/>
 
       <p>I like to help people cause trouble with code.</p>
+      <p class="fragment"><br/>But, I'm not a member of the Google Glass team.</p>
     </section>
 
     <section data-markdown>
@@ -109,13 +110,14 @@
     <section data-markdown>
       <script type="text/template">
         ## Where Glass fits
-        (super secret sub-agenda)
+        _super secret sub-agenda_
 
+<br/>
         It depends...
 
-        - Users
-        - Administration
-        - Problem scope
+        - Who is using it
+        - Who administrates it working
+        - Problem that you're solving
       </script>
     </section>
 
@@ -135,7 +137,7 @@
 
         - Internal IT
         - Service vendor
-        - Self
+        - The user themselves
       </script>
     </section>
 
@@ -155,7 +157,7 @@
 
       <p>You are all unique snowflakes.</p>
 
-      <img src="img/snowflakes.jpg"><br/>
+      <img style="max-height: 500px;" src="img/snowflakes.jpg"><br/>
 
       <small>Photo by Dakota Lynch</small>
     </section>
@@ -163,7 +165,7 @@
     <section>
         <h2>Tips and tricks</h2>
 
-        <img src="img/kitten.jpg"><br/>
+        <img style="max-height: 500px;" src="img/kitten.jpg"><br/>
         <small>Photo credit: <a href="https://www.flickr.com/photos/pinguino/2655478691">pinguino on Flickr</a></small>
     </section>
 
@@ -183,25 +185,28 @@
     <section>
       <h2>Warning</h2>
       <p>Hacking ahead. Thar be dragons</p>
-      <img src="img/trogdor.png">
-      <small>photo credit brownpau on flickr</small>
+      <img style="max-height: 500px;" src="img/trogdor.png">
+      <br/><small>Drawing credit brownpau on flickr</small>
     </section>
 
     <section>
       <h2>Power</h2>
 
-      <img class="fragment" src="img/usb-battery.png"><br/>
+      <img style="max-height: 500px;" class="fragment" src="img/usb-battery.png"><br/>
     </section>
 
     <section data-markdown>
       <script type="text/template">
         ## Power
 
-        - The USB port has 3 exclusive modes
-            - data
-            - power
+        - The USB port has different modes
+            - Data
+            - Fast charge
+            - USB host
             - audio
-        - Duty cycle to keep things under control
+        - Fix it in software
+            - Duty cycle to keep things under control
+            - Some sensors are more power hungry than others
       </script>
     </section>
 
@@ -233,7 +238,15 @@ $ fastboot flash system system.img   # Your custom system image
     </section>
 
     <section>
-      <h2>Bypass built in stuff</h2>
+      <h2>Bypass Built in stuff</h2>
+      <ul>
+        <li>Built in Glass features may not fit your enterprise</li>
+        <li>Some of this stuff requires root, find your balance</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Replace the launcher</h2>
       <ul>
         <li>You don't need root</li>
         <li>Overriding the launcher intent</li>
@@ -264,7 +277,10 @@ $ adb shell rm system/priv-app/GlassUpdate.apk
 
     <section>
       <h2>Prevent Timeline Sync</h2>
-      <p>Requires <code>WRITE_SYNC_SETTINGS</code> permission</p>
+      <ul>
+        <li>Requires <code>WRITE_SYNC_SETTINGS</code> permission</li>
+        <li>You don't need root</li>
+      </ul>
 
       <pre><code data-trim class="java" style="font-size: 22px;">
 // Disable all sync adapters
@@ -277,16 +293,17 @@ ContentResolver.cancelSync(null, null);
 
     <section>
       <h2>Run Glass without a user</h2>
-
-      <p>Strange things might happen (e.g. it breaks the camera button)</p>
+      <p>You need root</p>
 
       <pre><code data-trim class="bash" style="font-size: 22px;">
 # on a fresh Glass
 $ adb shell rm system/priv-app/GlassSetup.apk
 
 # after logging a user in
-adb shell rm data/system/users/0/accounts.db
+$ adb shell rm data/system/users/0/accounts.db
       </code></pre>
+
+      <p class="fragment">Strange things will happen (e.g. it breaks the camera button)</p>
     </section>
 
     <section data-markdown>
@@ -294,8 +311,7 @@ adb shell rm data/system/users/0/accounts.db
         ## Device management
 
         - Glass is young
-        - It's primarily intended for consumers
-        - More enterprise stuff is coming
+        - It's primarily intended for consumers, but more enterprise stuff is coming
         - For now, hacks
       </script>
     </section>
